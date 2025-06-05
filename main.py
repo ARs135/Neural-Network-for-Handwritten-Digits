@@ -11,6 +11,8 @@ def softmax(x):
 
 # --- Loss + utility ---
 def cross_entropy(pred, y): return -np.mean(np.sum(y * np.log(pred + 1e-9), axis=1))
+def accuracy(pred, y_true):
+    return np.mean(np.argmax(pred, axis=1) == np.argmax(y_true, axis=1))
 def one_hot(y, num_classes=10):
     out = np.zeros((len(y), num_classes))
     out[np.arange(len(y)), y] = 1
@@ -31,6 +33,15 @@ class NeuralNet:
         self.w4 = np.random.randn(64, 10) * np.sqrt(2 / 64)
         self.b4 = np.zeros((1, 10))
 
+        self.v_w1 = np.zeros_like(self.w1)
+        self.v_b1 = np.zeros_like(self.b1)
+        self.v_w2 = np.zeros_like(self.w2)
+        self.v_b2 = np.zeros_like(self.b2)
+        self.v_w3 = np.zeros_like(self.w3)
+        self.v_b3 = np.zeros_like(self.b3)
+        self.v_w4 = np.zeros_like(self.w4)
+        self.v_b4 = np.zeros_like(self.b4)
+
     def forward(self, x):
         self.z1 = x @ self.w1 + self.b1
         self.a1 = relu(self.z1)
@@ -45,7 +56,7 @@ class NeuralNet:
         self.a4 = softmax(self.z4)
         return self.a4
 
-    def backward(self, x, y, out, lr):
+    def backward(self, x, y, out, lr, momentum=0.9):
         m = x.shape[0]
 
         dz4 = out - y
@@ -65,14 +76,35 @@ class NeuralNet:
         db1 = np.sum(dz1, axis=0, keepdims=True) / m
 
         # Update weights
-        self.w4 -= lr * dw4
-        self.b4 -= lr * db4
-        self.w3 -= lr * dw3
-        self.b3 -= lr * db3
-        self.w2 -= lr * dw2
-        self.b2 -= lr * db2
-        self.w1 -= lr * dw1
-        self.b1 -= lr * db1
+        # Old Weight Updates (No Momentum)
+        #self.w4 -= lr * dw4
+        #self.b4 -= lr * db4
+        #self.w3 -= lr * dw3
+        #self.b3 -= lr * db3
+        #self.w2 -= lr * dw2
+        #self.b2 -= lr * db2
+        #self.w1 -= lr * dw1
+        #self.b1 -= lr * db1
+
+        self.v_w4 = momentum * self.v_w4 - lr * dw4
+        self.w4 += self.v_w4
+        self.v_b4 = momentum * self.v_b4 - lr * db4
+        self.b4 += self.v_b4
+
+        self.v_w3 = momentum * self.v_w3 - lr * dw3
+        self.w3 += self.v_w3
+        self.v_b3 = momentum * self.v_b3 - lr * db3
+        self.b3 += self.v_b3
+
+        self.v_w2 = momentum * self.v_w2 - lr * dw2
+        self.w2 += self.v_w2
+        self.v_b2 = momentum * self.v_b2 - lr * db2
+        self.b2 += self.v_b2
+
+        self.v_w1 = momentum * self.v_w1 - lr * dw1
+        self.w1 += self.v_w1
+        self.v_b1 = momentum * self.v_b1 - lr * db1
+        self.b1 += self.v_b1
 
     def train(self, x, y, epochs=150, lr=0.05, save_every=50, batch_size=64, lr_decay=0.95):
         num_samples = x.shape[0]
@@ -87,7 +119,7 @@ class NeuralNet:
                 y_batch = y_shuffled[i:i + batch_size]
 
                 out = self.forward(x_batch)
-                self.backward(x_batch, y_batch, out, lr)
+                self.backward(x_batch, y_batch, out, lr, momentum=0.9)
 
             # Decay learning rate after each epoch
             lr *= lr_decay
@@ -96,7 +128,8 @@ class NeuralNet:
             if (epoch + 1) % 10 == 0 or epoch == 0:
                 full_out = self.forward(x)
                 loss = cross_entropy(full_out, y)
-                print(f"Epoch {epoch + 1}, Loss: {loss:.7f}, LR: {lr:.5f}")
+                acc = accuracy(full_out, y)
+                print(f"Epoch {epoch + 1}, Loss: {loss:.7f}, Accuracy: {acc:.7f}, LR: {lr:.5f}")
 
             if (epoch + 1) % save_every == 0:
                 self.save_weights(f"model_weights_epoch{epoch + 1}.npz")
@@ -205,7 +238,7 @@ def predict_and_show():
     result.delete('1.0', tk.END)
     for i, prob in enumerate(preds):
         tag = " (Most Likely)" if i == most_likely else ""
-        result.insert(tk.END, f"{i}: {prob:.4f}{tag}\n")
+        result.insert(tk.END, f"{i}: {prob:.7f}{tag}\n")
 
 # --- Setup GUI ---
 root = tk.Tk()
