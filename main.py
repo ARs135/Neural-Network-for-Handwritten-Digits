@@ -96,7 +96,7 @@ class NeuralNet:
             if (epoch + 1) % 10 == 0 or epoch == 0:
                 full_out = self.forward(x)
                 loss = cross_entropy(full_out, y)
-                print(f"Epoch {epoch + 1}, Loss: {loss:.4f}, LR: {lr:.5f}")
+                print(f"Epoch {epoch + 1}, Loss: {loss:.7f}, LR: {lr:.5f}")
 
             if (epoch + 1) % save_every == 0:
                 self.save_weights(f"model_weights_epoch{epoch + 1}.npz")
