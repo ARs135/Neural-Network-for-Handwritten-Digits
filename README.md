@@ -2,6 +2,17 @@
 
 This is a simple but powerful neural network built from scratch in Python (using only NumPy) to recognize handwritten digits. It uses the MNIST dataset for training and includes a **Tkinter GUI** to draw and classify digits live.
 
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Requirements](#-requirements)
+- [Running the App](#-running-the-app)
+- [Pre-trained Weights](#-pre-trained-weights)
+- [Dataset](#-dataset)
+- [Miscellaneous](#-miscellaneous)
+- [License](#-license)
+- [Author](#-author)
+
 ## 🔧 Features
 
 - Fully connected neural network with 3 hidden layers
