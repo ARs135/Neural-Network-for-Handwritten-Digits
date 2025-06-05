@@ -28,7 +28,7 @@ pip install numpy tensorflow
 ```bash
 python main.py
 ```
-A window will open where you can draw digits using your mouse. Click **"Predict"** to see what the network thinks it is. You can also click **"Clear"** to try again.
+When you run the script, if pre-trained weights are found, you'll be given the option to continue training or launch the digit recognizer. Once in the GUI, draw digits using your mouse. Click **"Predict"** to see the network's guess, or **"Clear"** to try again.
 
 ## 🧪 Pre-trained Weights
 This repository includes pre-trained weights [model_weights.npz](model_weights.npz) so you can run the recognizer immediately without training from scratch. But if you want to re-train it, just delete the weights file and run the script — it will start training automatically.
